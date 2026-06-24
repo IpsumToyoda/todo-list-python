@@ -4,6 +4,9 @@
 # Store all tasks in a list (backend handles file I/O)
 import todo_app_backend as backend
 
+PRIORITY_OPTIONS = ["Low", "Normal", "High"]
+DEFAULT_CATEGORY = "General"
+
 tasks = []
 
 # Display all tasks with their numbers and status, or show "No tasks" if list is empty
@@ -13,7 +16,24 @@ def show_tasks():
     else:
         for i, task in enumerate(tasks, start=1):
             status = "Done" if task.get("done") else "Pending"
-            print(f"{i}. [{status}] {task['text']}")
+            priority = task.get("priority", "Normal")
+            category = task.get("category", DEFAULT_CATEGORY)
+            created_at = task.get("created_at", "")
+            print(
+                f"{i}. [{status}] {task['text']} \n"
+                f"   Priority: {priority} | Category: {category} | Created: {created_at}"
+            )
+
+
+def prompt_priority():
+    choice = input("Priority [Low/Normal/High] (default Normal): ").strip().capitalize()
+    return choice if choice in PRIORITY_OPTIONS else "Normal"
+
+
+def prompt_category():
+    category = input("Category (default General): ").strip()
+    return category if category else DEFAULT_CATEGORY
+
 
 # Add a new task to the list
 def add_task():
@@ -22,7 +42,9 @@ def add_task():
         print("Task cannot be empty.")
         return
 
-    backend.add_task(tasks, task_text)
+    priority = prompt_priority()
+    category = prompt_category()
+    backend.add_task(tasks, task_text, priority, category)
     print(f"Added task: {task_text}")
     backend.save_tasks(tasks)
 

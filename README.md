@@ -21,7 +21,15 @@ Streamlit UI:
 
 ```bash
 cd c:\STUDY\Python\TO-Do
+pip install -r requirements.txt
 c:/STUDY/Python/venv/Scripts/python.exe -m streamlit run "Web UI.py"
+```
+
+Deploy to Streamlit Cloud:
+
+```bash
+pip install -r requirements.txt
+streamlit run "Web UI.py"
 ```
 
 Notes

@@ -3,8 +3,14 @@ import todo_app_backend as backend
 
 def test_add_delete_mark():
     tasks = []
-    backend.add_task(tasks, "a")
-    assert tasks == [{"text": "a", "done": False}]
+    backend.add_task(tasks, "a", "High", "Work")
+    assert tasks == [{
+        "text": "a",
+        "done": False,
+        "priority": "High",
+        "category": "Work",
+        "created_at": tasks[0]["created_at"],
+    }]
 
     backend.mark_done(tasks, 0)
     assert tasks[0]["done"] is True
@@ -24,4 +30,8 @@ def test_save_load(tmp_path, monkeypatch):
     backend.save_tasks(tasks)
 
     loaded = backend.load_tasks()
-    assert loaded == [{"text": "b", "done": False}]
+    assert loaded[0]["text"] == "b"
+    assert loaded[0]["done"] is False
+    assert loaded[0]["priority"] == "Normal"
+    assert loaded[0]["category"] == "General"
+    assert "created_at" in loaded[0]

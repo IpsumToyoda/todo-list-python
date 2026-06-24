@@ -12,9 +12,12 @@ def main():
     with st.sidebar:
         st.header("Actions")
         new_task = st.text_input("New task")
+        priority = st.selectbox("Priority", ["Low", "Normal", "High"], index=1)
+        category = st.text_input("Category", value="General")
+
         if st.button("Add task"):
             if new_task.strip():
-                add_task(st.session_state.tasks, new_task.strip())
+                add_task(st.session_state.tasks, new_task.strip(), priority, category.strip() or "General")
                 save_tasks(st.session_state.tasks)
                 st.success(f"Added: {new_task.strip()}")
                 st.rerun()
@@ -30,29 +33,33 @@ def main():
     else:
         st.subheader(f"Tasks ({len(st.session_state.tasks)})")
         for index, task in enumerate(st.session_state.tasks):
-            cols = st.columns([6, 1, 1])
-            cols[0].write(f"{index + 1}. {task['text']}")
+            created_date = task.get("created_at", "")
+            if "T" in created_date:
+                created_date = created_date.split("T")[0]
+
+            cols = st.columns([4, 1, 1, 1])
+            cols[0].markdown(
+                f"**{index + 1}. {task['text']}**  \n"
+                f"Priority: {task.get('priority', 'Normal')}  \n"
+                f"Category: {task.get('category', 'General')}  \n"
+                f"Created: {created_date}"
+            )
             status_text = "✓ Done" if task["done"] else "⏳ Pending"
             cols[1].write(status_text)
 
-            if cols[2].button("Mark Done", key=f"done_{index}"):
-                mark_done(st.session_state.tasks, index)
-                save_tasks(st.session_state.tasks)
-                st.rerun()
+            if not task["done"]:
+                if cols[2].button("Mark Done", key=f"done_{index}"):
+                    mark_done(st.session_state.tasks, index)
+                    save_tasks(st.session_state.tasks)
+                    st.rerun()
+            else:
+                cols[2].write("")
 
-        st.markdown("---")
-        st.subheader("Delete Task")
-        delete_index = st.number_input(
-            "Task number to delete",
-            min_value=1,
-            max_value=len(st.session_state.tasks),
-            step=1,
-        )
-        if st.button("Delete task"):
-            removed = delete_task(st.session_state.tasks, delete_index - 1)
-            save_tasks(st.session_state.tasks)
-            st.success(f"Removed: {removed['text']}")
-            st.rerun()
+            if cols[3].button("Delete", key=f"delete_{index}"):
+                removed = delete_task(st.session_state.tasks, index)
+                save_tasks(st.session_state.tasks)
+                st.success(f"Removed: {removed['text']}")
+                st.rerun()
 
 
 if __name__ == "__main__":
